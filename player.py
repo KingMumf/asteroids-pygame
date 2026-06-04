@@ -44,3 +44,8 @@ class Player(CircleShape):
         rotated_vector = unit_vector.rotate(self.rotation)
         rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
         self.position += rotated_with_speed_vector
+
+    
+    def shoot(self) -> pygame.Vector2:
+        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        return forward * PLAYER_SHOOT_SPEED
