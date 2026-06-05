@@ -1,5 +1,7 @@
 import pygame
 from logger import log_event
+from player import Player
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Score():
     def __init__(self) -> None:
@@ -16,10 +18,14 @@ class Score():
         self.score = 0
         log_event("Score reset to 0.")
 
-    def draw(self, screen: pygame.Surface) -> None:
+    def draw(self, screen: pygame.Surface, lives: int) -> None:
         score_text = self.font.render(f"Score: {self.score}", True, "white")
         text_surface = self.font.render(f"Score: {self.score}", True, "white")
 
         position = (10, 10)
 
         screen.blit(text_surface, position)
+
+        lives_text = f"lives: {lives}"
+        lives_surface = self.font.render(lives_text, True, "white")
+        screen.blit(lives_surface, (screen.get_width() - 120, 10))

@@ -47,15 +47,9 @@ def main():
         for sprite in drawable:
             sprite.draw(screen)
 
-        scoreboard.draw(screen)
+        scoreboard.draw(screen, player.lives)
 
         updatable.update(dt)
-
-        for asteroid in asteroids:
-            if player.collides_with(asteroid):
-                log_event("player_hit")
-                print("Game Over!")
-                sys.exit()
 
         for shot in shots:
             for asteroid in asteroids:
@@ -64,6 +58,21 @@ def main():
                     shot.kill()
                     scoreboard.add_points(10)
                     asteroid.split()
+
+        if not player.invulnerable:
+            for asteroid in asteroids:
+                if player.collides_with(asteroid):
+                    player.lives -= 1
+                    scoreboard.draw(screen, player.lives)
+                    log_event(f"player_hit Lives remaining: {player.lives}")
+
+                    if player.lives > 0:
+                        player.respawn()
+                        break
+                    else:
+                        log_event("Game Over!")
+                        print(f"final score: {scoreboard.score}")
+                        sys.exit()
 
         pygame.display.flip()
 
