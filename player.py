@@ -1,5 +1,17 @@
 import pygame
-from constants import PLAYER_RADIUS, LINE_WIDTH, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN_SECONDS, SCREEN_WIDTH, SCREEN_HEIGHT
+import math
+from constants import (
+    PLAYER_RADIUS, 
+    LINE_WIDTH, 
+    PLAYER_TURN_SPEED, 
+    PLAYER_ACCELERATION, 
+    PLAYER_MAX_SPEED, 
+    PLAYER_FRICTION, 
+    PLAYER_SHOOT_SPEED, 
+    PLAYER_SHOOT_COOLDOWN_SECONDS, 
+    SCREEN_WIDTH, 
+    SCREEN_HEIGHT
+)
 from circleshape import CircleShape
 from shot import Shot
 
@@ -12,6 +24,7 @@ class Player(CircleShape):
         self.invulnerable_timer = 0.0
         self.rotation = 0
         self.shoot_cooldown = 0
+        self.velocity = pygame.Vector2(0, 0)
 
 
 # in the Player class
@@ -35,21 +48,6 @@ class Player(CircleShape):
 
     
     def update(self, dt: float) -> None:
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_a]:
-            self.rotate(-dt)
-        if keys[pygame.K_d]:
-            self.rotate(dt)
-        if keys[pygame.K_w]:
-            self.move(dt)
-        if keys[pygame.K_s]:
-            self.move(-dt)
-        if keys[pygame.K_SPACE]:
-            if self.shoot_cooldown <= 0:
-                self.shoot_cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
-                self.shoot()
-        
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= dt
             if self.shoot_cooldown < 0:
@@ -60,12 +58,36 @@ class Player(CircleShape):
             if self.invulnerable_timer <= 0:
                 self.invulnerable = False
 
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            self.rotate(-dt)
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            self.rotate(dt)
+        
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
+            self.move(dt)
+        elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+            self.velocity *= (1 - (PLAYER_FRICTION * 8) * dt)
+        else:
+            self.velocity *= (1 - PLAYER_FRICTION * dt)
+
+        if keys[pygame.K_SPACE]:
+            if self.shoot_cooldown <= 0:
+                self.shoot_cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
+                self.shoot()
+
+
+        if self.velocity.length_squared() > 0 and self.velocity.length() > PLAYER_MAX_SPEED:
+            self.velocity.scale_to_length(PLAYER_MAX_SPEED)
+
+        self.position += self.velocity * dt
+
+        self.wrap_around(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     def move(self, dt: float) -> None:
-        unit_vector = pygame.Vector2(0, 1)
-        rotated_vector = unit_vector.rotate(self.rotation)
-        rotated_with_speed_vector = rotated_vector * PLAYER_SPEED * dt
-        self.position += rotated_with_speed_vector
+        forward = pygame.Vector2(0, 1).rotate(self.rotation)
+        self.velocity += forward * PLAYER_ACCELERATION * dt
 
     
     def shoot(self):
