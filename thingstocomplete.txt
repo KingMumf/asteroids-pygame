@@ -1,11 +1,11 @@
 Add a scoring system - done (however needs a scoreboard when game over! )
 Implement multiple lives and respawning - done
 Add an explosion effect for the asteroids - done 
-Add acceleration to the player movement
-Make the objects wrap around the screen instead of disappearing
-Add a background image
-Create different weapon types
-Make the asteroids lumpy instead of perfectly round
+Add acceleration to the player movement - done
+Make the objects wrap around the screen instead of disappearing - done
+Add a background image - done
+Create different weapon types - done
+Make the asteroids lumpy instead of perfectly round - done
 Make the ship have a triangular hit box instead of a circular one
 Add a shield power-up
 Add a speed power-up

@@ -14,6 +14,11 @@ from constants import (
 )
 from circleshape import CircleShape
 from shot import Shot
+from weapons import (
+    StandardBlaster,
+    SpreadShot,
+    RapidFire
+)
 
 class Player(CircleShape):
     
@@ -23,8 +28,9 @@ class Player(CircleShape):
         self.invulnerable = False
         self.invulnerable_timer = 0.0
         self.rotation = 0
-        self.shoot_cooldown = 0
         self.velocity = pygame.Vector2(0, 0)
+        self.current_weapon = StandardBlaster()
+        self.shoot_cooldown = 0.0
 
 
 # in the Player class
@@ -74,8 +80,15 @@ class Player(CircleShape):
 
         if keys[pygame.K_SPACE]:
             if self.shoot_cooldown <= 0:
-                self.shoot_cooldown = PLAYER_SHOOT_COOLDOWN_SECONDS
+                self.shoot_cooldown = self.current_weapon.cooldown_time
                 self.shoot()
+
+        if keys[pygame.K_1]:
+            self.current_weapon = StandardBlaster()
+        if keys[pygame.K_2]:
+            self.current_weapon = SpreadShot()
+        if keys[pygame.K_3]:
+            self.current_weapon = RapidFire()
 
 
         if self.velocity.length_squared() > 0 and self.velocity.length() > PLAYER_MAX_SPEED:
@@ -91,9 +104,7 @@ class Player(CircleShape):
 
     
     def shoot(self):
-        shot = Shot(self.position.x, self.position.y)
-        forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        shot.velocity = forward * PLAYER_SHOOT_SPEED
+        self.current_weapon.fire(self.position, self.rotation)
 
     def respawn(self) -> None:
         self.position = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
